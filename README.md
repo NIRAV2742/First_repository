@@ -80,3 +80,11 @@ CREATE TABLE sales_order_25 (
         orderstatus IN ('in process', 'fulfilled', 'backorder', 'cancelled')
     )
 );
+//fifth table
+create table sales_order_details_25 
+(orderno varchar(6) references sales_order_25, 
+ productno varchar(6) references product_master_25, 
+ qtyordered number(8), 
+ qtydisp number(8), 
+ productrate number(10,2));
+desc sales_order_details_25
