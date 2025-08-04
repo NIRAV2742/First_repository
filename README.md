@@ -1,9 +1,3 @@
-drop table client_master_25
-desc client_master_25
-drop table product_master_25
-drop table salesman_master_25
-drop table sales_order_25
-drop table sales_order_details_25
 //first table
 create table client_master_25( clientno varchar(6)primary key, name varchar(15)not null, address1 varchar(5), address2 varchar(5), city varchar(15), pincode number(6), state varchar(15), baldue number(10,2), constraint chk_client check(clientno like 'C%'));
 insert into client_master_25 values('C00001','Rakesh Joshi','','','Mumbai',400054,'Maharashtra',15000);
