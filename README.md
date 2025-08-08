@@ -1,3 +1,9 @@
+drop table client_master_25
+desc client_master_25
+drop table product_master_25
+drop table salesman_master_25
+drop table sales_order_25
+drop table sales_order_details_25
 //first table
 create table client_master_25( clientno varchar(6)primary key, name varchar(15)not null, address1 varchar(5), address2 varchar(5), city varchar(15), pincode number(6), state varchar(15), baldue number(10,2), constraint chk_client check(clientno like 'C%'));
 insert into client_master_25 values('C00001','Rakesh Joshi','','','Mumbai',400054,'Maharashtra',15000);
@@ -119,45 +125,90 @@ SELECT SYSDATE + 15 AS DATE_AFTER_15_DAYS FROM DUAL;
  
 [C] Exercise on using Having and Group By Clauses: 
 1. Print the description and total qty sold for each product. 
-SELECT P.DESCRIPTION, SUM(SOD.QTYDISP) AS TOTAL_QTY
-FROM SALES_ORDER_DETAILS_23 SOD
-JOIN PRODUCT_MASTER_23 P ON SOD.PRODUCTNO = P.PRODUCTNO
+SELECT P.DESCRIPTION, SUM(SOD.QTYDISO) AS TOTAL_QTY
+FROM SALES_ORDER_DETAILS_25 SOD
+JOIN PRODUCT_MASTER_25 P ON SOD.PRODUCTNO = P.PRODUCTNO
 GROUP BY P.DESCRIPTION;
 
 2. Find the values of each product sold. 
-SELECT PRODUCTNO, SUM(QTYDISP * PRODUCTRATE) AS TOTAL_VALUE
-FROM SALES_ORDER_DETAILS_23
+SELECT PRODUCTNO, SUM(QTYDISO * PRODUCTRATE) AS TOTAL_VALUE
+FROM SALES_ORDER_DETAILS_25
 GROUP BY PRODUCTNO;
 
 3. Calculate the average qty sold for each client that has maximum order value of 15000.00. 
-SELECT S.CLIENTNO, AVG(SOD.QTYDISP) AS AVG_QTY
-FROM SALES_ORDER_DETAILS_23 SOD
-JOIN SALES_ORDER_23 S ON SOD.ORDERNO = S.ORDERNO
+SELECT S.CLIENTNO, AVG(SOD.QTYDISO) AS AVG_QTY
+FROM SALES_ORDER_DETAILS_25 SOD
+JOIN SALES_ORDER_25 S ON SOD.ORDERNO = S.ORDERNO
 GROUP BY S.CLIENTNO
-HAVING MAX(SOD.QTYDISP * PRODUCTRATE) <= 15000;
+HAVING MAX(SOD.QTYDISO * PRODUCTRATE) <= 15000;
 
 4. Find out the total of all the billed orders for the month of June. 
-SELECT SUM(SOD.QTYDISP * PRODUCTRATE) AS TOTAL_BILLED
-FROM SALES_ORDER_DETAILS_23 SOD
-JOIN SALES_ORDER_23 S ON SOD.ORDERNO = S.ORDERNO
-WHERE TO_CHAR(S.ORDERDATE, 'MM') = '06' AND S.BIILYN = 'Y';
-
+SELECT SUM(SOD.QTYDISO * PRODUCTRATE) AS TOTAL_BILLED
+FROM SALES_ORDER_DETAILS_25 SOD
+JOIN SALES_ORDER_25 S ON SOD.ORDERNO = S.ORDERNO
+WHERE TO_CHAR(S.ORDERDATE, 'MM') = '06' AND S.BILLYN = 'Y';
  
 [D] Exercise on Joins and Correlation: 
-1. Find out the products, which have been sold to ‘Rakesh Joshi’. 
+1. Find out the products, which have been sold to ‘Rakesh Joshi’.
+SELECT DISTINCT P.PRODUCTNO, P.DESCRIPTION
+FROM CLIENT_MASTER_25 C
+JOIN SALES_ORDER_25 SO ON C.CLIENTNO = SO.CLIENTNO
+JOIN SALES_ORDER_DETAILS_25 SOD ON SO.ORDERNO = SOD.ORDERNO
+JOIN PRODUCT_MASTER_25 P ON SOD.PRODUCTNO = P.PRODUCTNO
+WHERE C.NAME = 'Rakesh Joshi';
+ 
 2. Find out the products and their quantities that will have to be delivered in the current month. 
-3. List the ProductNo and description of constantly sold (i.e. rapidly moving) products. 
+SELECT P.PRODUCTNO, P.DESCRIPTION, SOD.QTYDISO AS QUANTITY FROM SALES_ORDER_25 SO JOIN SALES_ORDER_DETAILS_25 SOD ON SO.ORDERNO = SOD.ORDERNO JOIN PRODUCT_MASTER_25 P ON SOD.PRODUCTNO = P.PRODUCTNO WHERE TO_CHAR(SO.DELYDATE, 'MM') = TO_CHAR(SYSDATE, 'MM') AND TO_CHAR(SO.DELYDATE, 'YYYY') = TO_CHAR(SYSDATE, 'YYYY');
+
+3. List the ProductNo and description of constantly sold (i.e. rapidly moving) products.
+SELECT P.PRODUCTNO, P.DESCRIPTION FROM PRODUCT_MASTER_25 P JOIN SALES_ORDER_DETAILS_25 SOD ON P.PRODUCTNO = SOD.PRODUCTNO GROUP BY P.PRODUCTNO, P.DESCRIPTION HAVING COUNT(DISTINCT SOD.ORDERNO) > 1;
+ 
 4. Find the names of clients who have purchased ‘Trousers’. 
+SELECT DISTINCT C.NAME FROM CLIENT_MASTER_25 C JOIN SALES_ORDER_25 SO ON C.CLIENTNO = SO.CLIENTNO JOIN SALES_ORDER_DETAILS_25 SOD ON SO.ORDERNO = SOD.ORDERNO JOIN PRODUCT_MASTER_25 P ON SOD.PRODUCTNO = P.PRODUCTNO WHERE P.DESCRIPTION = 'Trouser';
+
 5. List the products and orders from customers who have ordered less than 5 units of ‘Pull Overs’. 
+SELECT SO.ORDERNO, C.NAME AS CLIENT_NAME, P.PRODUCTNO, P.DESCRIPTION, SOD.QTYORDERED FROM CLIENT_MASTER_25 C JOIN SALES_ORDER_25 SO ON C.CLIENTNO = SO.CLIENTNO JOIN SALES_ORDER_DETAILS_25 SOD ON SO.ORDERNO = SOD.ORDERNO JOIN PRODUCT_MASTER_25 P ON SOD.PRODUCTNO = P.PRODUCTNO WHERE P.DESCRIPTION = 'Pull Over' AND SOD.QTYORDERED < 5;
+
 6. Find the products and their quantities for the orders placed by ‘Rakesh Joshi’ and ‘Mayur Patel’. 
-7. Find the products and their quantities for the orders placed by ClientNo ‘C00001’ and ‘C00002’. 
+SELECT C.NAME AS CLIENT_NAME, P.PRODUCTNO, P.DESCRIPTION, SOD.QTYDISO AS QUANTITY_DELIVERED FROM CLIENT_MASTER_25 C JOIN SALES_ORDER_25 SO ON C.CLIENTNO = SO.CLIENTNO JOIN SALES_ORDER_DETAILS_25 SOD ON SO.ORDERNO = SOD.ORDERNO JOIN PRODUCT_MASTER_25 P ON SOD.PRODUCTNO = P.PRODUCTNO WHERE C.NAME IN ('Rakesh Joshi', 'Mayur Patel');
+
+7. Find the products and their quantities for the orders placed by ClientNo ‘C00001’ and ‘C00002’.
+SELECT SO.CLIENTNO, P.PRODUCTNO, P.DESCRIPTION, SOD.QTYDISO AS QUANTITY_DELIVERED FROM SALES_ORDER_25 SO JOIN SALES_ORDER_DETAILS_25 SOD ON SO.ORDERNO = SOD.ORDERNO JOIN PRODUCT_MASTER_25 P ON SOD.PRODUCTNO = P.PRODUCTNO WHERE SO.CLIENTNO IN ('C00001', 'C00002'); 
  
 [E] Exercise on Sub-queries: 
 1. Find the ProductNo and description of non-moving products i.e. products not being sold. 
-2. List the CustomerName, Address1, Address2, City and Pin Code for the client who has  
-             placed order no ‘O19001’. 
+SELECT PRODUCTNO, DESCRIPTION FROM PRODUCT_MASTER_25 WHERE PRODUCTNO NOT IN ( SELECT DISTINCT PRODUCTNO FROM SALES_ORDER_DETAILS_25);
+
+2. List the CustomerName, Address1, Address2, City and Pin Code for the client who has placed order no ‘O19001’. 
+SELECT C.NAME AS CUSTOMER_NAME, C.ADDRESS1, C.ADDRESS2, C.CITY, C.PINCODE FROM CLIENT_MASTER_25 C JOIN SALES_ORDER_25 S ON C.CLIENTNO = S.CLIENTNO WHERE S.ORDERNO = 'O19001';
+
 3. List the client names that have placed orders before the month of May-04 
+SELECT DISTINCT C.NAME FROM CLIENT_MASTER_25 C JOIN SALES_ORDER_25 S ON C.CLIENTNO = S.CLIENTNO WHERE S.ORDERDATE < DATE '2004-05-01';
+
 4. List if the product ‘Lycra Top’ has been ordered by any client and print the Client No.,  
               Name to whom it was sold. 
+SELECT DISTINCT C.CLIENTNO, C.NAME FROM CLIENT_MASTER_25 C JOIN SALES_ORDER_25 SO ON C.CLIENTNO = SO.CLIENTNO JOIN SALES_ORDER_DETAILS_25 SOD ON SO.ORDERNO = SOD.ORDERNO JOIN PRODUCT_MASTER_25 P ON SOD.PRODUCTNO = P.PRODUCTNO WHERE P.DESCRIPTION = 'Lycra Tops';
+
 5. List the names of clients who have placed orders worth Rs. 10000 or more. 
+SELECT C.NAME, SUM(SOD.QTYDISO * SOD.PRODUCTRATE) AS TOTAL_ORDER_VALUE FROM CLIENT_MASTER_25 C JOIN SALES_ORDER_25 SO ON C.CLIENTNO = SO.CLIENTNO JOIN SALES_ORDER_DETAILS_25 SOD ON SO.ORDERNO = SOD.ORDERNO GROUP BY C.NAME HAVING SUM(SOD.QTYDISO * SOD.PRODUCTRATE) >= 10000;
+
+
+
+create table deluxe (id number(6), name char(10), city char(10));
+desc deluxe
+desc root
+select*from deluxe
+select*from root
+select id, name from deluxe
+select *from deluxe where name='Vipul'
+select id,city from deluxe where name='John'
+insert into deluxe values (012389, 'John', 'Chittal');
+insert into deluxe(id, name, city)values(121220,'pop','perth');
+insert into deluxe values(:id, :name, :city);
+alter table deluxe add(mobileNo number(10));
+alter table deluxe drop (mobileNo);
+alter table deluxe rename city to address
+alter table deluxe rename to root
+alter table root modify(name varchar(10));
+alter table root modify(address varchar(20));
 
