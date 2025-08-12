@@ -207,6 +207,17 @@ begin
      end if;
 end;
 
+
+declare
+     nu1 number(3) := 342;
+begin
+     if (nu1>1000) then
+         insert into deluxe values ('aaa' , 'aqa' , 36323482);
+     else
+         insert into deluxe values ('sss' , 'vvv' , 9042353);
+     end if;
+end;
+
 create table deluxe (id number(6), name char(10), city char(10));
 desc deluxe
 desc root
