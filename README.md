@@ -194,6 +194,19 @@ SELECT C.NAME, SUM(SOD.QTYDISO * SOD.PRODUCTRATE) AS TOTAL_ORDER_VALUE FROM CLIE
 
 
 
+
+
+
+declare
+     nu1 number(2):=12;
+begin
+     if(nu1>99) then
+          dbms_output.put_line('Bigest');
+      else
+          dbms_output.put_line('Smaller');
+     end if;
+end;
+
 create table deluxe (id number(6), name char(10), city char(10));
 desc deluxe
 desc root
