@@ -218,6 +218,15 @@ begin
      end if;
 end;
 
+
+declare 
+     nu number(2);
+begin
+     if (nu<100) then
+         dbms_output.put_line('your number is less than 100');
+      end if;
+end;
+
 create table deluxe (id number(6), name char(10), city char(10));
 desc deluxe
 desc root
